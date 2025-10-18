@@ -1,6 +1,6 @@
 # Huffman Compression Tool
 
-[![CI](https://github.com/USERNAME/huffman/actions/workflows/ci.yml/badge.svg)](https://github.com/USERNAME/huffman/actions/workflows/ci.yml)
+[![CI](https://github.com/suhasghorp/huffman/actions/workflows/ci.yml/badge.svg)](https://github.com/suhasghorp/huffman/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A complete implementation of Huffman coding in C++23 with no exceptions, strict warnings, and comprehensive testing.
@@ -94,5 +94,26 @@ diff input.txt restored.txt  # Should be identical
 - Edge case coverage (empty files, single symbols)
 - Memory safety with smart pointers
 - No undefined behavior
+
+## Continuous Integration
+
+The project includes comprehensive GitHub Actions CI/CD that automatically tests on:
+
+### Test Matrix
+- **Windows (windows-latest)**:
+  - MSVC (cl compiler) - Debug & Release builds
+- **Ubuntu (ubuntu-latest)**:  
+  - GCC 13 - Debug & Release builds
+  - Clang 17 - Debug & Release builds
+
+### What's Tested
+- ✅ Compilation with strict warnings as errors
+- ✅ Complete unit test suite (frequency analysis, edge cases)
+- ✅ End-to-end roundtrip testing (compress → decompress → verify)
+- ✅ Command-line tool functionality
+- ✅ Cross-platform compatibility
+- ✅ Memory safety and leak detection
+
+All builds must pass before code can be merged, ensuring high code quality across all supported platforms.
 
 This implementation demonstrates production-quality C++23 code with modern idioms, comprehensive error handling, and robust testing practices.
