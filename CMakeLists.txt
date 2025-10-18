@@ -9,9 +9,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Disable exceptions globally
 if(NOT MSVC)
     add_compile_options(-fno-exceptions)
-else()
-    # MSVC uses /EHs- to disable exceptions
-    add_compile_options(/EHs-)
+    # Note: MSVC exception handling left enabled as /EHs- conflicts with STL
 endif()
 
 # Compiler-specific warning flags

@@ -25,4 +25,10 @@ struct Error {
 template<typename T>
 using result = std::expected<T, Error>;
 
+// Helper function for creating unexpected results
+template<typename T = void>
+inline auto unexpected(Error&& e) {
+    return std::unexpected<Error>(std::move(e));
+}
+
 } // namespace huffman

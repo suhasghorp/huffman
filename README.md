@@ -8,8 +8,10 @@ A complete implementation of Huffman coding in C++23 with no exceptions, strict 
 ## Supported Platforms
 
 - **Windows**: MSVC (cl compiler) with Visual Studio 2022
-- **Ubuntu**: GCC 13+ and Clang 17+
+- **Ubuntu**: GCC 13+ (full C++23 support)
 - **Architectures**: x64 (tested), should work on other architectures
+
+*Note: Clang support temporarily disabled due to incomplete C++23 std::expected implementation*
 
 ## Features
 
@@ -104,7 +106,6 @@ The project includes comprehensive GitHub Actions CI/CD that automatically tests
   - MSVC (cl compiler) - Debug & Release builds
 - **Ubuntu (ubuntu-latest)**:  
   - GCC 13 - Debug & Release builds
-  - Clang 17 - Debug & Release builds
 
 ### What's Tested
 - ✅ Compilation with strict warnings as errors
