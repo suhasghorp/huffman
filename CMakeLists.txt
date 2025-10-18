@@ -84,13 +84,45 @@ target_compile_features(huffd PRIVATE cxx_std_23)
 
 # Testing setup - use FetchContent for cross-platform compatibility
 include(FetchContent)
+
+# Set policy for download timestamps to avoid warnings
+if(POLICY CMP0135)
+    cmake_policy(SET CMP0135 NEW)
+endif()
+
 FetchContent_Declare(
   googletest
-  URL https://github.com/google/googletest/archive/03597a01ee50cb48e4a2e5d82b7615f6e9e85e84.zip
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG        v1.14.0
+  GIT_SHALLOW    TRUE
 )
+
 # For Windows: Prevent overriding the parent project's compiler/linker settings
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
+# Disable GTest's own tests and examples
+set(BUILD_GMOCK OFF CACHE BOOL "")
+set(INSTALL_GTEST OFF CACHE BOOL "")
+
+# Temporarily disable warnings as errors for dependencies
+set(CMAKE_WARN_AS_ERROR_OLD ${CMAKE_WARN_AS_ERROR})
+set(CMAKE_WARN_AS_ERROR OFF)
+
 FetchContent_MakeAvailable(googletest)
+
+# Restore warning settings
+set(CMAKE_WARN_AS_ERROR ${CMAKE_WARN_AS_ERROR_OLD})
+
+# Disable warnings for GTest targets
+if(TARGET gtest)
+    if(MSVC)
+        target_compile_options(gtest PRIVATE /w)
+        target_compile_options(gtest_main PRIVATE /w)
+    else()
+        target_compile_options(gtest PRIVATE -w)
+        target_compile_options(gtest_main PRIVATE -w)
+    endif()
+endif()
 
 enable_testing()
 
