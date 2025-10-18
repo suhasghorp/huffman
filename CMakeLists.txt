@@ -114,8 +114,17 @@ set(CMAKE_WARN_AS_ERROR ${CMAKE_WARN_AS_ERROR_OLD})
 # Disable warnings for GTest targets
 if(TARGET gtest)
     if(MSVC)
+        # Remove /W4 and set /w to suppress all warnings
+        get_target_property(gtest_options gtest COMPILE_OPTIONS)
+        if(gtest_options)
+            list(REMOVE_ITEM gtest_options /W4)
+        endif()
         target_compile_options(gtest PRIVATE /w)
         target_compile_options(gtest_main PRIVATE /w)
+        
+        # Also remove /W4 from the targets and set /w
+        set_target_properties(gtest PROPERTIES COMPILE_OPTIONS "/w")
+        set_target_properties(gtest_main PROPERTIES COMPILE_OPTIONS "/w")
     else()
         target_compile_options(gtest PRIVATE -w)
         target_compile_options(gtest_main PRIVATE -w)

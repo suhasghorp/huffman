@@ -23,7 +23,7 @@ struct CodeTable {
     
     CodeTable() {
         // Initialize all lengths to 0
-        std::fill(lengths.begin(), lengths.end(), 0);
+        std::fill(lengths.begin(), lengths.end(), byte{0});
     }
 };
 
