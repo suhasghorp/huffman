@@ -1,0 +1,161 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    name: ${{ matrix.os }}-${{ matrix.compiler }}
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Windows with MSVC (cl compiler only)
+          - os: windows-latest
+            compiler: msvc
+            build_type: Release
+            
+          - os: windows-latest
+            compiler: msvc
+            build_type: Debug
+
+          # Ubuntu with g++
+          - os: ubuntu-latest
+            compiler: gcc
+            build_type: Release
+            cc: gcc-13
+            cxx: g++-13
+            
+          - os: ubuntu-latest
+            compiler: gcc
+            build_type: Debug
+            cc: gcc-13
+            cxx: g++-13
+
+          # Ubuntu with clang++
+          - os: ubuntu-latest
+            compiler: clang
+            build_type: Release
+            cc: clang-17
+            cxx: clang++-17
+            
+          - os: ubuntu-latest
+            compiler: clang
+            build_type: Debug
+            cc: clang-17
+            cxx: clang++-17
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Windows MSVC
+      if: matrix.os == 'windows-latest'
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Setup Ubuntu compilers
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        if [ "${{ matrix.compiler }}" = "gcc" ]; then
+          sudo apt-get install -y gcc-13 g++-13
+        else
+          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+          sudo add-apt-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-17 main"
+          sudo apt-get update
+          sudo apt-get install -y clang-17 clang++-17
+        fi
+        sudo apt-get install -y libgtest-dev
+
+    - name: Cache CMake build
+      uses: actions/cache@v4
+      with:
+        path: |
+          build-${{ matrix.build_type }}
+        key: ${{ runner.os }}-${{ matrix.compiler }}-${{ matrix.build_type }}-${{ hashFiles('CMakeLists.txt', 'src/**', 'include/**') }}
+        restore-keys: |
+          ${{ runner.os }}-${{ matrix.compiler }}-${{ matrix.build_type }}-
+
+    - name: Configure CMake (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        cmake -B build-${{ matrix.build_type }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+
+    - name: Configure CMake (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
+      env:
+        CC: ${{ matrix.cc }}
+        CXX: ${{ matrix.cxx }}
+      run: |
+        cmake -B build-${{ matrix.build_type }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_C_COMPILER=${{ matrix.cc }} -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
+
+    - name: Build
+      run: |
+        cmake --build build-${{ matrix.build_type }} --parallel
+
+    - name: Test
+      run: |
+        cd build-${{ matrix.build_type }}
+        ctest --output-on-failure --verbose
+
+    - name: Test CLI tools (Windows)
+      if: matrix.os == 'windows-latest'
+      shell: cmd
+      run: |
+        cd build-${{ matrix.build_type }}
+        huffc.exe ../tests/test.txt test-compressed.huf
+        huffd.exe test-compressed.huf test-restored.txt
+        fc /b ../tests/test.txt test-restored.txt
+
+    - name: Test CLI tools (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        cd build-${{ matrix.build_type }}
+        ./huffc ../tests/test.txt test-compressed.huf
+        ./huffd test-compressed.huf test-restored.txt
+        diff ../tests/test.txt test-restored.txt
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: build-artifacts-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.build_type }}
+        path: |
+          build-${{ matrix.build_type }}/
+          !build-${{ matrix.build_type }}/CMakeFiles/
+        retention-days: 7
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.build_type }}
+        path: |
+          build-${{ matrix.build_type }}/Testing/
+          build-${{ matrix.build_type }}/*.xml
+        retention-days: 30
+
+  # Summary job that depends on all test jobs
+  test-summary:
+    name: Test Summary
+    needs: test
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Check test results
+      run: |
+        echo "Test results summary:"
+        echo "====================="
+        if [ "${{ needs.test.result }}" = "success" ]; then
+          echo "✅ All tests passed successfully!"
+          exit 0
+        else
+          echo "❌ Some tests failed. Check the individual job logs above."
+          exit 1
+        fi
