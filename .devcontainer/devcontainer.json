@@ -1,21 +1,42 @@
 {
-    "name": "Huffman Clang++19 Test Environment",
+    "name": "Huffman C++23 - Ubuntu GCC 13 (Default)",
     "image": "ubuntu:24.04",
-    "workspaceFolder": "/workspace",
-    "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
-    "customizations": {},
-    "postCreateCommand": [
+    "features": {
+        "ghcr.io/devcontainers/features/common-utils:2": {
+            "installZsh": true,
+            "configureZshAsDefaultShell": true,
+            "username": "vscode",
+            "userUid": "automatic",
+            "userGid": "automatic"
+        },
+        "ghcr.io/devcontainers/features/git:1": {},
+        "ghcr.io/devcontainers/features/github-cli:1": {}
+    },
+    "onCreateCommand": [
         "bash", "-c", 
-        "apt-get update && apt-get install -y wget gnupg software-properties-common && \
-         wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - && \
-         add-apt-repository 'deb http://apt.llvm.org/noble/ llvm-toolchain-noble-19 main' && \
-         apt-get update && \
-         apt-get install -y clang-19 clang++-19 libc++-19-dev libc++abi-19-dev cmake make git && \
-         update-alternatives --install /usr/bin/clang clang /usr/bin/clang-19 100 && \
-         update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-19 100"
+        "apt-get update && apt-get install -y build-essential cmake gcc-13 g++-13 clang-tidy gdb valgrind ninja-build pkg-config && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 100 --slave /usr/bin/g++ g++ /usr/bin/g++-13"
     ],
-    "remoteEnv": {
-        "CC": "clang-19",
-        "CXX": "clang++-19"
-    }
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.cpptools",
+                "ms-vscode.cmake-tools",
+                "twxs.cmake",
+                "llvm-vs-code-extensions.vscode-clangd",
+                "notskm.clang-tidy"
+            ],
+            "settings": {
+                "cmake.configureSettings": {
+                    "CMAKE_BUILD_TYPE": "Debug",
+                    "CMAKE_CXX_STANDARD": "23",
+                    "CMAKE_CXX_COMPILER": "/usr/bin/g++-13"
+                },
+                "C_Cpp.default.cppStandard": "c++23",
+                "C_Cpp.default.compilerPath": "/usr/bin/g++-13"
+            }
+        }
+    },
+    "workspaceFolder": "/workspaces/huffman",
+    "postCreateCommand": "echo 'Ubuntu GCC 13 devcontainer ready. Run scripts/test-gcc.sh to build and test.'",
+    "remoteUser": "vscode"
 }
