@@ -9,7 +9,6 @@ namespace huffman {
 namespace {
     // Magic bytes and version identifier
     constexpr std::array<char, 4> MAGIC = {'H', 'F', 'N', '1'};
-    constexpr std::size_t ENTRY_SIZE = 9;  // 1 byte symbol + 8 byte frequency
 }
 
 result<void> write_header(std::ostream& os, const Header& header) {

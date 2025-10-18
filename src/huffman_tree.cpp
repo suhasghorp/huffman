@@ -6,17 +6,18 @@
 
 namespace huffman {
 
-// Destructor definitions (needed to break circular dependency)
-Branch::~Branch() = default;
-Node::~Node() = default;
+// Custom deleter implementation
+void NodeDeleter::operator()(Node* ptr) const {
+    delete ptr;
+}
 
-result<std::unique_ptr<Node>> build_huffman_tree(const FreqTable& table) {
+result<NodePtr> build_huffman_tree(const FreqTable& table) {
     // Collect all symbols with non-zero frequencies
-    std::vector<std::unique_ptr<Node>> nodes;
+    std::vector<NodePtr> nodes;
     
     for (std::size_t i = 0; i < 256; ++i) {
         if (table[i] > 0) {
-            auto leaf = std::make_unique<Node>(table[i], Leaf(static_cast<byte>(i)));
+            auto leaf = make_node_ptr(table[i], Leaf(static_cast<byte>(i)));
             nodes.push_back(std::move(leaf));
         }
     }
@@ -24,7 +25,7 @@ result<std::unique_ptr<Node>> build_huffman_tree(const FreqTable& table) {
     // Handle edge cases
     if (nodes.empty()) {
         // No symbols in input - return null as valid empty tree
-        return std::unique_ptr<Node>{};
+        return NodePtr{};
     }
     
     if (nodes.size() == 1) {
@@ -33,31 +34,31 @@ result<std::unique_ptr<Node>> build_huffman_tree(const FreqTable& table) {
     }
     
     // Custom comparator for min-heap (priority queue defaults to max-heap)
-    auto compare = [](const std::unique_ptr<Node>& a, const std::unique_ptr<Node>& b) {
+    auto compare = [](const NodePtr& a, const NodePtr& b) {
         return a->freq > b->freq;  // Reverse comparison for min-heap
     };
     
     // Use priority queue for efficient min-frequency selection
-    std::priority_queue<std::unique_ptr<Node>, std::vector<std::unique_ptr<Node>>, decltype(compare)> 
+    std::priority_queue<NodePtr, std::vector<NodePtr>, decltype(compare)> 
         pq(compare, std::move(nodes));
     
     // Build tree by repeatedly combining two smallest-frequency nodes
     while (pq.size() > 1) {
         // Extract two nodes with smallest frequencies
-        auto left = std::move(const_cast<std::unique_ptr<Node>&>(pq.top()));
+        auto left = std::move(const_cast<NodePtr&>(pq.top()));
         pq.pop();
-        auto right = std::move(const_cast<std::unique_ptr<Node>&>(pq.top()));
+        auto right = std::move(const_cast<NodePtr&>(pq.top()));
         pq.pop();
         
         // Create new branch node with combined frequency
         auto combined_freq = left->freq + right->freq;
-        auto branch = std::make_unique<Node>(combined_freq, Branch(std::move(left), std::move(right)));
+        auto branch = make_node_ptr(combined_freq, Branch(std::move(left), std::move(right)));
         
         pq.push(std::move(branch));
     }
     
     // Return the root node
-    return std::move(const_cast<std::unique_ptr<Node>&>(pq.top()));
+    return std::move(const_cast<NodePtr&>(pq.top()));
 }
 
 } // namespace huffman

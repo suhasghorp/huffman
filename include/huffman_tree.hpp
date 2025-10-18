@@ -7,6 +7,17 @@
 
 namespace huffman {
 
+// Forward declaration
+struct Node;
+
+// Custom deleter for Node - declared here, defined in .cpp
+struct NodeDeleter {
+    void operator()(Node* ptr) const;
+};
+
+// Unique pointer type for Node with custom deleter
+using NodePtr = std::unique_ptr<Node, NodeDeleter>;
+
 // Leaf node contains a symbol
 struct Leaf {
     byte symbol;
@@ -16,10 +27,10 @@ struct Leaf {
 
 // Branch node has left and right children  
 struct Branch {
-    std::unique_ptr<struct Node> left;
-    std::unique_ptr<struct Node> right;
+    NodePtr left;
+    NodePtr right;
     
-    Branch(std::unique_ptr<struct Node> l, std::unique_ptr<struct Node> r) 
+    Branch(NodePtr l, NodePtr r) 
         : left(std::move(l)), right(std::move(r)) {}
     
     // Move-only type
@@ -27,8 +38,6 @@ struct Branch {
     Branch& operator=(const Branch&) = delete;
     Branch(Branch&&) = default;
     Branch& operator=(Branch&&) = default;
-    
-    ~Branch(); // Declared here, defined in .cpp
 };
 
 // Node combines frequency with either a Leaf or Branch
@@ -38,10 +47,15 @@ struct Node {
     
     Node(std::uint64_t f, Leaf leaf) : freq(f), data(std::move(leaf)) {}
     Node(std::uint64_t f, Branch branch) : freq(f), data(std::move(branch)) {}
-    ~Node(); // Declared here, defined in .cpp
 };
 
+// Helper function to create NodePtr
+template<typename... Args>
+NodePtr make_node_ptr(Args&&... args) {
+    return NodePtr(new Node(std::forward<Args>(args)...), NodeDeleter{});
+}
+
 // Build Huffman tree from frequency table
-result<std::unique_ptr<Node>> build_huffman_tree(const FreqTable& table);
+result<NodePtr> build_huffman_tree(const FreqTable& table);
 
 } // namespace huffman
