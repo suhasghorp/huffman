@@ -1,0 +1,26 @@
+# Set default behavior to automatically normalize line endings
+* text=auto
+
+# Force text files to have LF line endings on checkout
+*.cpp text eol=lf
+*.hpp text eol=lf
+*.h text eol=lf
+*.c text eol=lf
+*.txt text eol=lf
+*.md text eol=lf
+*.cmake text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+CMakeLists.txt text eol=lf
+
+# Ensure test.txt maintains its exact binary content
+tests/test.txt binary
+
+# Binary files
+*.exe binary
+*.dll binary  
+*.so binary
+*.a binary
+*.lib binary
+*.obj binary
+*.o binary
