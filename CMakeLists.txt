@@ -144,4 +144,4 @@ target_compile_features(huffman_tests PRIVATE cxx_std_23)
 target_compile_definitions(huffman_tests PRIVATE CMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 target_compile_definitions(huffman_tests PRIVATE CMAKE_BINARY_DIR="${CMAKE_BINARY_DIR}")
 
-add_test(NAME huffman_tests COMMAND huffman_tests)
+add_test(NAME huffman_tests COMMAND $<TARGET_FILE:huffman_tests>)
