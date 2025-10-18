@@ -95,10 +95,10 @@ jobs:
       if: matrix.os == 'windows-latest'
       shell: cmd
       run: |
-        cd build-${{ matrix.build_type }}
-        huffc.exe ../tests/test.txt test-compressed.huf
+        cd build-${{ matrix.build_type }}\${{ matrix.build_type }}
+        huffc.exe ..\..\tests\test.txt test-compressed.huf
         huffd.exe test-compressed.huf test-restored.txt
-        fc /b ../tests/test.txt test-restored.txt
+        fc /b ..\..\tests\test.txt test-restored.txt
 
     - name: Test CLI tools (Ubuntu)
       if: matrix.os == 'ubuntu-latest'
