@@ -9,9 +9,8 @@ A complete implementation of Huffman coding in C++23 with no exceptions, strict 
 
 - **Windows**: MSVC (cl compiler) with Visual Studio 2022
 - **Ubuntu**: GCC 13+ (full C++23 support)
+- **Ubuntu**: Clang 19+ (full C++23 support)
 - **Architectures**: x64 (tested), should work on other architectures
-
-*Note: Clang support temporarily disabled due to incomplete C++23 std::expected implementation*
 
 ## Features
 
@@ -106,6 +105,7 @@ The project includes comprehensive GitHub Actions CI/CD that automatically tests
   - MSVC (cl compiler) - Debug & Release builds
 - **Ubuntu (ubuntu-latest)**:  
   - GCC 13 - Debug & Release builds
+  - Clang 19 - Debug & Release builds
 
 ### What's Tested
 - ✅ Compilation with strict warnings as errors
@@ -117,4 +117,29 @@ The project includes comprehensive GitHub Actions CI/CD that automatically tests
 
 All builds must pass before code can be merged, ensuring high code quality across all supported platforms.
 
-This implementation demonstrates production-quality C++23 code with modern idioms, comprehensive error handling, and robust testing practices.
+## Local Development & Testing
+
+### Devcontainer Support
+The project includes devcontainer configurations for local testing before pushing to CI:
+
+- **Linux Clang++19**: `.devcontainer/devcontainer.json`
+- **Windows MSVC**: `.devcontainer/devcontainer-windows.json`
+
+```bash
+# Quick validation with Clang (matches CI environment)
+docker run --rm -v "$(pwd):/workspace" huffman-clang19 /workspace/scripts/test-clang.sh
+
+# Windows MSVC validation (PowerShell)
+docker run --rm -v "${PWD}:C:\workspace" huffman-msvc powershell -File C:\workspace\scripts\test-msvc.ps1
+```
+
+See `docs/DEVCONTAINERS.md` for complete setup instructions.
+
+### Compiler-Specific Rules
+The project maintains compatibility across GCC, Clang, and MSVC by following patterns documented in `WARP.md`, including:
+- Custom deleters for circular dependency resolution (Clang requirement)
+- Multi-config generator handling (MSVC requirement)
+- Explicit type construction to avoid narrowing warnings
+- Proper warning flag isolation for external dependencies
+
+This implementation demonstrates production-quality C++23 code with modern idioms, comprehensive error handling, and robust cross-compiler testing practices.

@@ -1,0 +1,18 @@
+{
+    "name": "Huffman MSVC Test Environment",
+    "image": "mcr.microsoft.com/devcontainers/cpp:latest-windowsservercore-ltsc2022",
+    "workspaceFolder": "C:\\workspace",
+    "workspaceMount": "source=${localWorkspaceFolder},target=C:\\workspace,type=bind",
+    "customizations": {},
+    "postCreateCommand": [
+        "powershell", "-Command",
+        "choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y; choco install git -y; choco install visualstudio2022buildtools --package-parameters \"--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended\" -y; refreshenv"
+    ],
+    "remoteEnv": {
+        "CC": "cl",
+        "CXX": "cl"
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/powershell:1": {}
+    }
+}
