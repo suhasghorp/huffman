@@ -7,8 +7,6 @@
 
 namespace huffman {
 
-struct Node;
-
 // Leaf node contains a symbol
 struct Leaf {
     byte symbol;
@@ -16,13 +14,21 @@ struct Leaf {
     explicit Leaf(byte s) : symbol(s) {}
 };
 
-// Branch node has left and right children
+// Branch node has left and right children  
 struct Branch {
-    std::unique_ptr<Node> left;
-    std::unique_ptr<Node> right;
+    std::unique_ptr<struct Node> left;
+    std::unique_ptr<struct Node> right;
     
-    Branch(std::unique_ptr<Node> l, std::unique_ptr<Node> r) 
+    Branch(std::unique_ptr<struct Node> l, std::unique_ptr<struct Node> r) 
         : left(std::move(l)), right(std::move(r)) {}
+    
+    // Move-only type
+    Branch(const Branch&) = delete;
+    Branch& operator=(const Branch&) = delete;
+    Branch(Branch&&) = default;
+    Branch& operator=(Branch&&) = default;
+    
+    ~Branch(); // Declared here, defined in .cpp
 };
 
 // Node combines frequency with either a Leaf or Branch
@@ -32,6 +38,7 @@ struct Node {
     
     Node(std::uint64_t f, Leaf leaf) : freq(f), data(std::move(leaf)) {}
     Node(std::uint64_t f, Branch branch) : freq(f), data(std::move(branch)) {}
+    ~Node(); // Declared here, defined in .cpp
 };
 
 // Build Huffman tree from frequency table

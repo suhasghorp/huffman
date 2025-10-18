@@ -6,6 +6,10 @@
 
 namespace huffman {
 
+// Destructor definitions (needed to break circular dependency)
+Branch::~Branch() = default;
+Node::~Node() = default;
+
 result<std::unique_ptr<Node>> build_huffman_tree(const FreqTable& table) {
     // Collect all symbols with non-zero frequencies
     std::vector<std::unique_ptr<Node>> nodes;
