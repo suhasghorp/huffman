@@ -37,6 +37,19 @@ jobs:
             cc: gcc-13
             cxx: g++-13
 
+          # Ubuntu with clang++ (full C++23 support)
+          - os: ubuntu-latest
+            compiler: clang
+            build_type: Release
+            cc: clang-19
+            cxx: clang++-19
+            
+          - os: ubuntu-latest
+            compiler: clang
+            build_type: Debug
+            cc: clang-19
+            cxx: clang++-19
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -46,10 +59,20 @@ jobs:
       uses: microsoft/setup-msbuild@v2
 
     - name: Setup Ubuntu GCC
-      if: matrix.os == 'ubuntu-latest'
+      if: matrix.os == 'ubuntu-latest' && matrix.compiler == 'gcc'
       run: |
         sudo apt-get update
         sudo apt-get install -y gcc-13 g++-13
+
+    - name: Setup Ubuntu Clang
+      if: matrix.os == 'ubuntu-latest' && matrix.compiler == 'clang'
+      run: |
+        sudo apt-get update
+        # Add LLVM repository for clang 19
+        wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+        sudo add-apt-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-19 main"
+        sudo apt-get update
+        sudo apt-get install -y clang-19 clang++-19 libc++-19-dev libc++abi-19-dev
 
     - name: Cache CMake build and dependencies
       uses: actions/cache@v4
