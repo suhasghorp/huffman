@@ -75,7 +75,13 @@ jobs:
       run: |
         cmake -B build-${{ matrix.build_type }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_C_COMPILER=${{ matrix.cc }} -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
 
-    - name: Build
+    - name: Build (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        cmake --build build-${{ matrix.build_type }} --config ${{ matrix.build_type }} --parallel
+
+    - name: Build (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
       run: |
         cmake --build build-${{ matrix.build_type }} --parallel
 
